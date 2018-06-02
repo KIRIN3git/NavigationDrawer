@@ -1,51 +1,58 @@
 package com.example.shinji.navigationdrawer;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import static com.example.shinji.navigationdrawer.R.array.drawer_items;
 
-public class MainActivity extends Activity {
+
+public class MainActivity extends AppCompatActivity {
 
 	private DrawerLayout mDrawerLayout;
 	private View mDrawerView;
 	private ActionBarDrawerToggle mDrawerToggle;
+	private Toolbar mToolbar;
+	private String[] mNavigationTitles;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
-		mDrawerView = findViewById(R.id.drawer_frame);
+		// ・ツールバー
+		mToolbar = (Toolbar) findViewById(R.id.tool_bar);
+		// ツールバーのセット
+		setSupportActionBar(mToolbar);
 
+		// ・レイアウトとドロワー
+		mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
 		// 1. ActionBarDrawerToggleクラスのインスタンスを作成し、
 		// DrawerLayoutにsetDrawerListener()でセットする
-
 		mDrawerToggle = new ActionBarDrawerToggle(
 				this,                 /* Navigation Drawerを持つActivity */
 				mDrawerLayout,        /* DrawerLayout オブジェクト */
-				R.drawable.ic_drawer, /* Navigation Drawer Indicator */
+				mToolbar, /* Navigation Drawer Indicator */
 				R.string.drawer_open, /* "open drawer" の説明 */
 				R.string.drawer_close /* "close drawer" の説明 */)
 		{
+			// ドロワーが開いたとき
 			@Override
 			public void onDrawerClosed(View drawerView) {
 				super.onDrawerClosed(drawerView);
 				// onPrepareOptionsMenu()が呼ばれるようにする
 				invalidateOptionsMenu();
 			}
-
+			// ドロワーが閉じたとき
 			@Override
 			public void onDrawerOpened(View drawerView) {
 				super.onDrawerOpened(drawerView);
@@ -53,15 +60,11 @@ public class MainActivity extends Activity {
 				invalidateOptionsMenu();
 			}
 		};
+		// レイアウトにドロワーを登録
+		mDrawerLayout.addDrawerListener(mDrawerToggle);
 
-		mDrawerLayout.setDrawerListener(mDrawerToggle);
-
-		// 2. ホームボタンを使うようにする
-		getActionBar().setDisplayHomeAsUpEnabled(true);
-		getActionBar().setHomeButtonEnabled(true);
-
-		// 3. 必要であれば、DrawerLayoutに影をセットする
-		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+		// ドロワービューの設定
+		mDrawerView = findViewById(R.id.drawer_frame);
 
 		setupNavDrawerList();
 
@@ -69,10 +72,12 @@ public class MainActivity extends Activity {
 
 	}
 
-	private String[] mNavigationTitles;
-
+	/***
+	 * ドロワービューにリストを設定
+	 * クリックしたら、selectItem
+	 */
 	private void setupNavDrawerList() {
-		mNavigationTitles = getResources().getStringArray(R.array.drawer_items);
+		mNavigationTitles = getResources().getStringArray(drawer_items);
 		ListView listView = (ListView) mDrawerView;
 
 		// ListViewにアダプターをセット
@@ -102,49 +107,13 @@ public class MainActivity extends Activity {
 		mDrawerLayout.closeDrawer(mDrawerView);
 	}
 
+	// トグルボタン作成時
 	@Override
 	protected void onPostCreate(Bundle savedInstanceState) {
 		super.onPostCreate(savedInstanceState);
-
-		// 4. onPostCreated()でActionBarDrawerToggleのsyncState()
+		Log.w( "DEBUG_DATA", "onPostCreate");
+		// 状態のSync
 		mDrawerToggle.syncState();
-	}
-
-	@Override
-	public void onConfigurationChanged(Configuration newConfig) {
-		super.onConfigurationChanged(newConfig);
-
-		// 5. onConfigurationChanged()で
-		// ActionBarDrawerToggleのonConfigurationChanged()を呼ぶ
-		mDrawerToggle.onConfigurationChanged(newConfig);
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-
-		// 6. onOptionsItemSelected()でActionBarDrawerToggleの
-		// onOptionsItemSelected() を呼んで、ホームボタンが押されたときの処理を行う
-		if (mDrawerToggle.onOptionsItemSelected(item)) {
-			return true;
-		}
-
-		// ホームボタン以外の通常のAction Itemの処理を行う
-
-		return super.onOptionsItemSelected(item);
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.main, menu);
-		return super.onCreateOptionsMenu(menu);
-	}
-
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		// Navigation Drawerが開いていたら R.id.action_addのメニュー項目を表示しない
-		boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerView);
-		menu.findItem(R.id.action_add).setVisible(!drawerOpen);
-		return super.onPrepareOptionsMenu(menu);
 	}
 
 }
